@@ -238,3 +238,10 @@ else
     error "not all required packages installed, exiting."
     exit 1
 fi
+
+if [[ $_OS_VER >= 10  ]] ; then
+    success "Operating System supported"
+else
+    error "Operating System not supported, exiting."
+    exit 1
+fi
