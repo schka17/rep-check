@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
 ####################################
 # karl.schindler@gmx.at  2020-09-01
@@ -147,7 +147,7 @@ _REQ_OS_VER="10"
 _REPOSITORY="gitlab.c4sam.com"
 _PORTS="22 443 6000"
 # required Software packages
-_REQUIREMENTS="dig traceroute git curl docker netstat "
+_REQUIREMENTS="dig traceroute git curl docker netstat"
 
 GET_DEFAULT_INT
 
@@ -239,9 +239,9 @@ else
     exit 1
 fi
 
-# if [[ $_OS_VER -ge 10  ]] ; then
-#     success "Operating System supported"
-# else
-#     error "Operating System not supported, exiting."
-#     exit 1
-# fi
+if [[ $_OS_VER -le $_REQ_OS_VER ]] || [[ $_OS != "${_REQ_OS}" ]] ; then
+    error "Operating System ${_OS} ${_OS_VER} not supported, exiting."
+else
+    success "Operating System supported"
+    exit 1
+fi
