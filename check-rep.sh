@@ -1,4 +1,4 @@
-#!/usr/bin/env bash
+#!/bin/bash
 
 ####################################
 # karl.schindler@gmx.at  2020-09-01
@@ -239,9 +239,9 @@ else
     exit 1
 fi
 
-if [[ $_OS_VER >= 10  ]] ; then
-    success "Operating System supported"
-else
-    error "Operating System not supported, exiting."
-    exit 1
-fi
+# if [[ $_OS_VER -ge 10  ]] ; then
+#     success "Operating System supported"
+# else
+#     error "Operating System not supported, exiting."
+#     exit 1
+# fi
