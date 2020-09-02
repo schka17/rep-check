@@ -240,7 +240,7 @@ else
 fi
 
 if [[ $_OS_VER -le $_REQ_OS_VER ]] || [[ $_OS != "${_REQ_OS}" ]] ; then
-    error "Operating System ${_OS} ${_OS_VER} not supported, exiting."
+    error "Operating System ${_OS} ${_OS_VER} not supported, ${_REQ_OS} ${_REQ_OS_VER} required exiting."
 else
     success "Operating System supported"
     exit 1
