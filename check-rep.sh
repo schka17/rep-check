@@ -147,7 +147,7 @@ _REQ_OS_VER="10"
 _REPOSITORY="gitlab.c4sam.com"
 _PORTS="22 443 6000"
 # required Software packages
-_REQUIREMENTS="dig traceroute git curl docker netstat testing"
+_REQUIREMENTS="dig traceroute git curl docker netstat "
 
 GET_DEFAULT_INT
 
