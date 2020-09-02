@@ -14,6 +14,20 @@
 # -c or --color define the color for the print. See the array colors for the available options.
 # -n or --noline directs the system not to print a new line after the content.
 # Last argument is the message to be printed.
+if [ "$EUID" -ne 0 ]
+  then echo "Please run as root or sudo!"
+  exit
+fi
+script="${0##*/}"
+#exec 2>&1 | tee -a /var/log/${script} 
+#exec 1 2>&1 | tee -a /var/log/$script.log
+#exec &>> /dev/udp/192.168.12.2/12345 2>&1 |tee -a /var/log/$script.log
+set -e
+
+stagelog="/var/log/c4sam_install_stage.log"
+clear
+
+
 cecho () {
  
     declare -A colors;
@@ -262,69 +276,73 @@ function PROCEED {
     esac
 
 }
-PRINT_HASH
-information "Hostname: ${_FQDN}" 
-information "Operating System: ${_OS} , Version: ${_OS_VER}" 
-information "Default Interface: ${_DEFAULT_INT}, Default GW: ${_DEFAULT_GW}"
-# get public IP
-myWanIP=`dig +short myip.opendns.com @resolver1.opendns.com`
-#echo "Public IP is ${myWanIP}"
-information "Public IP is ${myWanIP}"
-PRINT_HASH
-information "Checking Name Resolution"
-# Checking for the resolved IP address from the end of the command output. Refer
-# the normal command output of nslookup to understand why.
-resolvedIP=$(nslookup "${_REPOSITORY}" | awk -F':' '/^Address: / { matched = 1 } matched { print $2}' | xargs)
 
-# Deciding the lookup status by checking the variable has a valid IP string
-[[ -z "$resolvedIP" ]] && error "${_REPOSITORY}" lookup failure || success "${_REPOSITORY} resolved to ${resolvedIP}"
+function main() {
+    PRINT_HASH
+    information "Hostname: ${_FQDN}" 
+    information "Operating System: ${_OS} , Version: ${_OS_VER}" 
+    information "Default Interface: ${_DEFAULT_INT}, Default GW: ${_DEFAULT_GW}"
+    # get public IP
+    myWanIP=`dig +short myip.opendns.com @resolver1.opendns.com`
+    #echo "Public IP is ${myWanIP}"
+    information "Public IP is ${myWanIP}"
+    PRINT_HASH
+    information "Checking Name Resolution"
+    # Checking for the resolved IP address from the end of the command output. Refer
+    # the normal command output of nslookup to understand why.
+    resolvedIP=$(nslookup "${_REPOSITORY}" | awk -F':' '/^Address: / { matched = 1 } matched { print $2}' | xargs)
 
-#traceroute $resolvedIP
+    # Deciding the lookup status by checking the variable has a valid IP string
+    [[ -z "$resolvedIP" ]] && error "${_REPOSITORY}" lookup failure || success "${_REPOSITORY} resolved to ${resolvedIP}"
 
-#ping -c1 -W1 -q $resolvedIP && echo "${resolvedIP} is reachable" || echo "${resolvedIP} is down"
-PRINT_HASH
+    #traceroute $resolvedIP
 
-CHECK_REPOSITORY_ALIVE $resolvedIP
+    #ping -c1 -W1 -q $resolvedIP && echo "${resolvedIP} is reachable" || echo "${resolvedIP} is down"
+    PRINT_HASH
 
-PRINT_HASH
+    CHECK_REPOSITORY_ALIVE $resolvedIP
 
-information "Checking Software Packages"
+    PRINT_HASH
 
-for i in $_REQUIREMENTS; do
-    #echo "Checking Software Package ${i} "
-    CHECK_PKG $i
-done 
+    information "Checking Software Packages"
 
-PRINT_HASH
+    for i in $_REQUIREMENTS; do
+        #echo "Checking Software Package ${i} "
+        CHECK_PKG $i
+    done 
 
-information "Checking Ports"
-for i in $_PORTS; do
-    #echo "Check Port ${i} on ${_REPOSITORY}"
-    CHECK_PORT $i
-done
-PRINT_HASH
-if [[ $_REQ_PORTS == "true" ]] ; then
-    success "required ports open"
-else
-    error "not all required ports are open, exiting"
-    exit 1
-fi
+    PRINT_HASH
 
-if [[ $_REQ_SW == "true" ]] ; then
-    success "required software installed"
-else
-    error "not all required packages installed, exiting."
-    exit 1
-fi
+    information "Checking Ports"
+    for i in $_PORTS; do
+        #echo "Check Port ${i} on ${_REPOSITORY}"
+        CHECK_PORT $i
+    done
+    PRINT_HASH
+    if [[ $_REQ_PORTS == "true" ]] ; then
+        success "required ports open"
+    else
+        error "not all required ports are open, exiting"
+        exit 1
+    fi
 
-if [[ $_OS_VER -ge $_REQ_OS_VER ]] && [[ $_OS == "${_REQ_OS}" ]] ; then
-    success "Operating System supported"
-else
-    error "Operating System ${_OS} ${_OS_VER} not supported, ${_REQ_OS} ${_REQ_OS_VER} required, exiting."
-    exit 1
-fi
+    if [[ $_REQ_SW == "true" ]] ; then
+        success "required software installed"
+    else
+        error "not all required packages installed, exiting."
+        exit 1
+    fi
+
+    if [[ $_OS_VER -ge $_REQ_OS_VER ]] && [[ $_OS == "${_REQ_OS}" ]] ; then
+        success "Operating System supported"
+    else
+        error "Operating System ${_OS} ${_OS_VER} not supported, ${_REQ_OS} ${_REQ_OS_VER} required, exiting."
+        exit 1
+    fi
 
 PROCEED
+}
 
+main 2>&1 | tee -a /var/log/${script}.log
 
 exit 0
