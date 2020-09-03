@@ -279,6 +279,21 @@ function PROCEED {
 
 function main() {
     PRINT_HASH
+    information "Checking Software Packages"
+
+    for i in $_REQUIREMENTS; do
+        #echo "Checking Software Package ${i} "
+        CHECK_PKG $i
+    done 
+
+    PRINT_HASH
+    if [[ $_REQ_SW == "true" ]] ; then
+        success "required software installed"
+    else
+        error "not all required packages installed, exiting."
+        exit 1
+    fi
+    PRINT_HASH
     information "Hostname: ${_FQDN}" 
     information "Operating System: ${_OS} , Version: ${_OS_VER}" 
     information "Default Interface: ${_DEFAULT_INT}, Default GW: ${_DEFAULT_GW}"
@@ -304,14 +319,7 @@ function main() {
 
     PRINT_HASH
 
-    information "Checking Software Packages"
-
-    for i in $_REQUIREMENTS; do
-        #echo "Checking Software Package ${i} "
-        CHECK_PKG $i
-    done 
-
-    PRINT_HASH
+    
 
     information "Checking Ports"
     for i in $_PORTS; do
@@ -326,12 +334,7 @@ function main() {
         exit 1
     fi
 
-    if [[ $_REQ_SW == "true" ]] ; then
-        success "required software installed"
-    else
-        error "not all required packages installed, exiting."
-        exit 1
-    fi
+    
 
     if [[ $_OS_VER -ge $_REQ_OS_VER ]] && [[ $_OS == "${_REQ_OS}" ]] ; then
         success "Operating System supported"
