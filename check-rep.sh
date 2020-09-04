@@ -9,24 +9,24 @@
 #   if sw repository is reachable
 #   if required packages are installed
 #   if ports are open
+# Return codes:
+# 1 not root/Superuser
+# 2 repository not reacahble
+# 3 required packages not installed
+# 4 not authorized
+# 5 file not found
+# 6 required ports not open
+# 7 Operating System not supported
+# 8 Wrong language settings
+# 9 Debian Source = CD
+# 127 other
+
+
 
 # The following function prints a text using custom color
 # -c or --color define the color for the print. See the array colors for the available options.
 # -n or --noline directs the system not to print a new line after the content.
 # Last argument is the message to be printed.
-if [ "$EUID" -ne 0 ]
-  then echo "Please run as root or sudo!"
-  exit
-fi
-script="${0##*/}"
-#exec 2>&1 | tee -a /var/log/${script} 
-#exec 1 2>&1 | tee -a /var/log/$script.log
-#exec &>> /dev/udp/192.168.12.2/12345 2>&1 |tee -a /var/log/$script.log
-set -e
-
-stagelog="/var/log/c4sam_install_stage.log"
-clear
-
 
 cecho () {
  
@@ -152,15 +152,36 @@ function GET_DEFAULT_GW {
         _DEFAULT_INT="n/a"
     fi    
 }
+function SCRIPT_ABORT {
+    error "${_exit_message}  Aborting ..."
+    exit $_exit_code
+}
+
+if [ "$EUID" -ne 0 ]
+  then
+  declare -i _exit_code=1
+  declare _exit_message="Please run as root or sudo!"
+  SCRIPT_ABORT #$_exit_code $_exit_message 
+  #exit
+fi
+script="${0##*/}"
+#exec 2>&1 | tee -a /var/log/${script} 
+#exec 1 2>&1 | tee -a /var/log/$script.log
+#exec &>> /dev/udp/192.168.12.2/12345 2>&1 |tee -a /var/log/$script.log
+set -e
+
+stagelog="/var/log/c4sam_install_stage.log"
+clear
 _REQ_SW="true"
 _REQ_PORTS="true"
 _REQ_OS="debian"
 _REQ_OS_VER="9"
+_REQ_LANG="en_US.UTF-8"
 #_REPOSITORY="hal9000tng.homelinux.net"
 _REPOSITORY="gitlab.c4sam.com"
 _PORTS="22 443 6000"
 # required Software packages
-_REQUIREMENTS="dig traceroute git curl docker netstat"
+_REQUIREMENTS="route dig traceroute git curl netstat ntpstat" #docker sohuold be installed with cockpit/minion install script
 
 GET_DEFAULT_INT
 
@@ -178,33 +199,57 @@ function PRINT_HASH {
 
 function CHECK_REPOSITORY_ALIVE {
     information "Check Connectivity to Host"
-    ping -c1 -W1 -q $1 &>/dev/null
+    ping -c1 -W1 -q $1 &>/var/log/${script}.log
     status=$( echo $? )
     if [[ $status == 0 ]] ; then
         success "$1 is alive"
         #Connection success!
     else
-        error "$1 is down"
-        exit 1
+        #error "$1 is down"
+        declare -i _exit_code=2
+        declare _exit_message="C4SAM Software Repository not reachable"
+        SCRIPT_ABORT 
+        #exit 1
         #Connection failure
     fi
 }
+function CHECK_LANGUAGE_SETTING {
+    if [[ "${LANG}" != "${_REQ_LANG}" ]] ; then
+        declare -i _exit_code=8
+        declare _exit_message="Wrong Language settings ${LANG}, must be ${_REQ_LANG} "
+        SCRIPT_ABORT
+    else
+        success "Check Language settings passed ${LANG}"    
+    fi         
+}
 function CHECK_PKG {
-    #command -v $1 /dev/null 2>&1 || { echo >&2 "I require $1 but it's not installed.  Aborting."; exit 1; }
-    if (command -v $1) > /dev/null; then
+    #command -v $1 /var/log/${script}.log 2>&1 || { echo >&2 "I require $1 but it's not installed.  Aborting."; exit 1; }
+    _REQ_SW="true"
+    if (command -v $1) >> /var/log/${script}.log; then
         #cecho -c 'green' "$1 is installed"
         success "$1 is installed"
     else
-       error "$1 is not installed, setup cannot continue."
-       _REQ_SW="false"
-       #exit 1
+        error "$1 is not installed"
+        _REQ_SW="false"
+        INSTALL_PACKAGES $1
+        #
+       
+    #exit 1
     fi        
+}
+
+function CHECK_PACKAGES {
+    information "Checking Software Packages"
+    for i in $_REQUIREMENTS; do
+        #echo "Checking Software Package ${i} "
+        CHECK_PKG $i
+    done 
 }
 
 function CHECK_PORT {
     port=$1
-    #if (exec 3<>/dev/tcp/${_REPOSITORY}/${port}) 2> /dev/null; then
-    if (exec 1<>/dev/tcp/${resolvedIP}/${port}) 2> /dev/null; then
+    #if (exec 3<>/dev/tcp/${_REPOSITORY}/${port}) 2> /var/log/${script}.log; then
+    if (exec 1<>/dev/tcp/${resolvedIP}/${port}) 2>> /var/log/${script}.log; then
         success "${port} is open"
     else
         error 'red' "${port} is closed"
@@ -213,20 +258,29 @@ function CHECK_PORT {
 }
 
 function INSTALL {
-    chmod 754 install_cockpit.sh &&./install_cockpit.sh && rm install_cockpit.sh
+    chmod 754 install_${_install_type}.sh &&./install_${_install_type}.sh && rm install_${_install_type}.sh
 }
 
 function DL_INSTALLER {
-    information "download installer using Token ${TOKEN}"
-    response=$(curl --request GET --header "PRIVATE-TOKEN: ${TOKEN}" -sL -w "%{http_code}" -o install_cockpit.sh 'https://gitlab.c4sam.com/api/v4/projects/46/repository/files/install_cockpit.sh/raw?ref=master')
+    information "download installer for ${_install_type} using Token ${TOKEN}"
+    if [[ $_install_type == "minion" ]]; then
+        declare -i _exit_code=127
+        declare _exit_message="Not implemented yet"
+        SCRIPT_ABORT
+    elif [[ $_install_type == "cockpit" ]]; then
+        _source="https://gitlab.c4sam.com/api/v4/projects/46/repository/files/install_cockpit.sh/raw?ref=master"
+    #response=$(curl --request GET --header "PRIVATE-TOKEN: ${TOKEN}" -sL -w "%{http_code}" -o install_${_install_type}.sh 'https://gitlab.c4sam.com/api/v4/projects/46/repository/files/install_${_install_type}.sh/raw?ref=master')
+    response=$(curl --request GET --header "PRIVATE-TOKEN: ${TOKEN}" -sL -w "%{http_code}" -o install_${_install_type}.sh '${_source}')
+    fi
     case "$response" in
         200) success "Download Success" && INSTALL ;;
         301) information $response ;;
         #304) printf "Received: HTTP $response (file unchanged) ==> $url\n" ;;
-        401) error "Not Authorized" && exit 1;;
-        404) error "file not found" && exit 1;;
+        401) error "Not Authorized" && exit 4;;
+        404) error "file not found" && exit 5;;
           *) information  "Received: HTTP $response " ;;
     esac
+    
 }
 
 function ENTER_TOKEN {
@@ -254,6 +308,11 @@ function ENTER_TOKEN {
 }
 
 function PROCEED {
+    if [[ $_install_type == "minion" ]]; then
+        declare -i _exit_code=127
+        declare _exit_message="Not implemented yet"
+        SCRIPT_ABORT
+    fi    
     PRINT_HASH
     #echo $'\e[0;92m############################';
     echo ""
@@ -276,23 +335,114 @@ function PROCEED {
     esac
 
 }
+function SELECT_INSTALLATION {
+        read -p $'\e[0;34mSelect Installation ? (C)ockpit  (M)inion (E)xit? (C/M/E): \e[1;33m ' _select
+        case $_select in
+            c|C )
+                _install_type="cockpit" ;;
+            m|M )
+                _install_type="minion" ;;
+            e|E )
+                echo "exit"
+                echo $'\e[0m' 
+                exit ;;        
+            * )
+                echo "exit"
+                echo $'\e[0m'
+                ;;
+        esac
+}
+function CHECK_UPDATES {
+    
+    information "Update Package Information"
+    apt -y update >  /var/log/${script}.log 2>&1
+    _no_updates=`apt list --upgradeable 2>> /var/log/${script}.log | grep -v -e '^[[:space:]]*$' | grep -v 'Listing'| wc -l`
+    information "${_no_updates} Updates available"
+    if [[ $_no_updates -gt 0 ]]; then
+    read -p $'\e[0;31mProceed updating packages? (Y) No (N)? (Y/N): \e[1;33m ' confirm
+        case $confirm in
+            y|Y )
+                apt -y upgrade ;;
+            * )
+                echo "Proceed without updating"
+                echo $'\e[0m'
+                ;;
+        esac
+    fi    
+}
+function INSTALL_PACKAGE {
+    _package=$1
+    echo "Installation procedure for ${_package}"
+    case $_package in
+        docker )
+            echo "need to install package ${_package} with special function" ;;
+        dig )
+            echo "${_package} need to install package dnsutils " 
+            apt install -y dnsutils;;    
+        netstat|route )
+            echo "${_package} need to install package net-tools " 
+            apt install -y net-tools;;
+        * )
+            echo "install package ${_package}" 
+            apt install -y $_package ;;
+    esac
+    CHECK_PACKAGES        
+}
+function INSTALL_PACKAGES {
+    _package=$1
+    information "Install Package ${_package}"
+    
+    read -p $'\e[0;31mInstall required package? (Y) No (N)? (Y/N): \e[1;33m ' confirm
+        case $confirm in
+            y|Y )
+                #echo "install package ${_package} " 
+                INSTALL_PACKAGE $1;;
+            * )
+                echo "Proceed without installing"
+                _REQ_SW="false"
+                echo $'\e[0m'
+                ;;
+        esac
+}
+function CHECK_DEBIAN_SOURCES {
+    _cd_rom_source=`cat /etc/apt/sources.list |grep -v "#" |grep "cdrom:"|wc -l`
+    if [[ $_cd_rom_source -gt 0 ]]; then
+        declare -i _exit_code=9
+        declare _exit_message="Package Source is CDROM, change Debian installation source in file /etc/apt/sources.list to an online Source!"
+        SCRIPT_ABORT
+    else
+        success "Check Installation Source passed"    
+    fi     
+}
 
 function main() {
+    SELECT_INSTALLATION
     PRINT_HASH
-    information "Checking Software Packages"
+    information "Checking Installation Source"
+    CHECK_DEBIAN_SOURCES
 
-    for i in $_REQUIREMENTS; do
-        #echo "Checking Software Package ${i} "
-        CHECK_PKG $i
-    done 
+    PRINT_HASH
+    information "Checking language settings"
+    CHECK_LANGUAGE_SETTING
 
+    PRINT_HASH
+    information "Checking Software Updates"
+    CHECK_UPDATES    
+
+    PRINT_HASH
+    CHECK_PACKAGES
+    
     PRINT_HASH
     if [[ $_REQ_SW == "true" ]] ; then
         success "required software installed"
     else
-        error "not all required packages installed, exiting."
-        exit 1
+        declare -i _exit_code=3
+        declare _exit_message="not all required packages installed, exiting. "
+        SCRIPT_ABORT
+        # error "not all required packages installed, exiting."
+        # exit 3
     fi
+
     PRINT_HASH
     information "Hostname: ${_FQDN}" 
     information "Operating System: ${_OS} , Version: ${_OS_VER}" 
@@ -330,8 +480,11 @@ function main() {
     if [[ $_REQ_PORTS == "true" ]] ; then
         success "required ports open"
     else
-        error "not all required ports are open, exiting"
-        exit 1
+        declare -i _exit_code=6
+        declare _exit_message="not all required ports are open, exiting"
+        SCRIPT_ABORT
+        # error "not all required ports are open, exiting"
+        # exit 1
     fi
 
     
@@ -339,8 +492,11 @@ function main() {
     if [[ $_OS_VER -ge $_REQ_OS_VER ]] && [[ $_OS == "${_REQ_OS}" ]] ; then
         success "Operating System supported"
     else
-        error "Operating System ${_OS} ${_OS_VER} not supported, ${_REQ_OS} ${_REQ_OS_VER} required, exiting."
-        exit 1
+        declare -i _exit_code=7
+        declare _exit_message="Operating System ${_OS} ${_OS_VER} not supported, ${_REQ_OS} ${_REQ_OS_VER} required, exiting. "
+        SCRIPT_ABORT
+        # error "Operating System ${_OS} ${_OS_VER} not supported, ${_REQ_OS} ${_REQ_OS_VER} required, exiting."
+        # exit 1
     fi
 
 PROCEED
