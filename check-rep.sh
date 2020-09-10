@@ -153,6 +153,7 @@ function GET_DEFAULT_GW {
     fi    
 }
 function SCRIPT_ABORT {
+    
     error "${_exit_message}  Aborting ..."
     exit $_exit_code
 }
@@ -415,6 +416,16 @@ function CHECK_DEBIAN_SOURCES {
     fi     
 }
 
+function GET_PUBLIC_IP {
+    set +e  ### dont exit on returncode > 0
+    myWanIP=`dig +short myip.opendns.com @resolver1.opendns.com`
+    if [[ $? -gt 0 ]]
+        error "Public IP could not be determind"
+    else    
+        information "Public IP is ${myWanIP}"
+    fi
+    set -e    
+}
 function main() {
     SELECT_INSTALLATION
     PRINT_HASH
@@ -449,9 +460,8 @@ function main() {
     information "Operating System: ${_OS} , Version: ${_OS_VER}" 
     information "Default Interface: ${_DEFAULT_INT}, Default GW: ${_DEFAULT_GW}"
     # get public IP
-    myWanIP=`dig +short myip.opendns.com @resolver1.opendns.com`
-    #echo "Public IP is ${myWanIP}"
-    information "Public IP is ${myWanIP}"
+    GET_PUBLIC_IP
+    
     PRINT_HASH
     information "Checking Name Resolution"
     # Checking for the resolved IP address from the end of the command output. Refer
