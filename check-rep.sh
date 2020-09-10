@@ -271,7 +271,7 @@ function DL_INSTALLER {
     elif [[ $_install_type == "cockpit" ]]; then
         _source="https://gitlab.c4sam.com/api/v4/projects/46/repository/files/install_cockpit.sh/raw?ref=master"
     #response=$(curl --request GET --header "PRIVATE-TOKEN: ${TOKEN}" -sL -w "%{http_code}" -o install_${_install_type}.sh 'https://gitlab.c4sam.com/api/v4/projects/46/repository/files/install_${_install_type}.sh/raw?ref=master')
-    response=$(curl --request GET --header "PRIVATE-TOKEN: ${TOKEN}" -sL -w "%{http_code}" -o install_${_install_type}.sh '${_source}')
+    response=$(curl --request GET --header "PRIVATE-TOKEN: ${TOKEN}" -sL -w "%{http_code}" -o install_${_install_type}.sh ${_source})
     fi
     case "$response" in
         200) success "Download Success" && INSTALL ;;
