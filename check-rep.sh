@@ -264,17 +264,17 @@ function INSTALL {
 
 function DL_INSTALLER {
     set +e
-    information "download installer for ${_install_type} using Token ${TOKEN}"
+        information "download installer for ${_install_type} using Token ${TOKEN}"
     if [[ $_install_type == "minion" ]]; then
         declare -i _exit_code=127
         declare _exit_message="Not implemented yet"
         SCRIPT_ABORT
     elif [[ $_install_type == "cockpit" ]]; then
         _source="https://gitlab.c4sam.com/api/v4/projects/46/repository/files/install_cockpit.sh/raw?ref=master"
-    #response=$(curl --request GET --header "PRIVATE-TOKEN: ${TOKEN}" -sL -w "%{http_code}" -o install_${_install_type}.sh 'https://gitlab.c4sam.com/api/v4/projects/46/repository/files/install_${_install_type}.sh/raw?ref=master')
+    #response=$(curl --request GET --header "PRIVATE-TOKEN: ${TOKEN}" -sL -w "%{http_code}" -o install_${_install_type}.sh 'https://gitlab.c4sam.com/api/v4/projects/$
     response="$(curl --request GET --header "PRIVATE-TOKEN: ${TOKEN}" -sL -w "%{http_code}" -o install_${_install_type}.sh ${_source})"
-    #response=$(curl --request GET --header "PRIVATE-TOKEN: ${TOKEN}" -sL -w "%{http_code}" -o install_${_install_type}.sh ${_source})
-    #information "Command: curl --request GET --header \"PRIVATE-TOKEN: ${TOKEN}\" -sL -w \"%{http_code}\" -o install_${_install_type}.sh ${_source} "
+#    echo $response
+    information "Command: curl --request GET --header \"PRIVATE-TOKEN: ${TOKEN}\" -sL -w \"%{http_code}\" -o install_${_install_type}.sh '${_source}' "
     fi
     case "$response" in
         200) success "Download Success" && INSTALL ;;
@@ -285,6 +285,7 @@ function DL_INSTALLER {
           *) information  "Received: HTTP $response " ;;
     esac
     set -e
+
 }
 
 function ENTER_TOKEN {
