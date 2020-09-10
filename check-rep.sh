@@ -263,6 +263,7 @@ function INSTALL {
 }
 
 function DL_INSTALLER {
+    set +e
     information "download installer for ${_install_type} using Token ${TOKEN}"
     if [[ $_install_type == "minion" ]]; then
         declare -i _exit_code=127
@@ -283,7 +284,7 @@ function DL_INSTALLER {
         404) error "file not found" && exit 5;;
           *) information  "Received: HTTP $response " ;;
     esac
-    
+    set -e
 }
 
 function ENTER_TOKEN {
