@@ -271,15 +271,13 @@ function DL_INSTALLER {
         SCRIPT_ABORT
     elif [[ $_install_type == "cockpit" ]]; then
         _source="https://gitlab.c4sam.com/api/v4/projects/46/repository/files/install_cockpit.sh/raw?ref=master"
-    #response=$(curl --request GET --header "PRIVATE-TOKEN: ${TOKEN}" -sL -w "%{http_code}" -o install_${_install_type}.sh 'https://gitlab.c4sam.com/api/v4/projects/$
     response="$(curl --request GET --header "PRIVATE-TOKEN: ${TOKEN}" -sL -w "%{http_code}" -o install_${_install_type}.sh ${_source})"
-#    echo $response
-    information "Command: curl --request GET --header \"PRIVATE-TOKEN: ${TOKEN}\" -sL -w \"%{http_code}\" -o install_${_install_type}.sh '${_source}' "
+    #information "Command: curl --request GET --header \"PRIVATE-TOKEN: ${TOKEN}\" -sL -w \"%{http_code}\" -o install_${_install_type}.sh '${_source}' "
     fi
     case "$response" in
         200) success "Download Success" && INSTALL ;;
         301) information $response ;;
-        #304) printf "Received: HTTP $response (file unchanged) ==> $url\n" ;;
+        #304) information "Received: HTTP $response (file unchanged) ==> $url\n" ;;
         401) error "Not Authorized" && exit 4;;
         404) error "file not found" && exit 5;;
           *) information  "Received: HTTP $response " ;;
