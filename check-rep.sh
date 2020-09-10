@@ -419,7 +419,7 @@ function CHECK_DEBIAN_SOURCES {
 function GET_PUBLIC_IP {
     set +e  ### dont exit on returncode > 0
     myWanIP=`dig +short myip.opendns.com @resolver1.opendns.com`
-    if [[ $? -gt 0 ]]
+    if [[ $? -gt 0 ]]; then
         error "Public IP could not be determind"
     else    
         information "Public IP is ${myWanIP}"
