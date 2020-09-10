@@ -183,7 +183,7 @@ _PORTS="22 443 6000"
 # required Software packages
 _REQUIREMENTS="route dig traceroute git curl netstat ntpstat" #docker sohuold be installed with cockpit/minion install script
 
-GET_DEFAULT_INT
+#GET_DEFAULT_INT
 
 _OS="$(grep "^ID" /etc/*-release | cut -d"=" -f2-)"
 _OS_VER="$(grep "^VERSION_ID" /etc/*-release | cut -d"=" -f2- | awk '{gsub(/\"|\;/,"",$1)}1')"
@@ -442,7 +442,8 @@ function main() {
         # error "not all required packages installed, exiting."
         # exit 3
     fi
-
+    GET_DEFAULT_INT
+    GET_DEFAULT_INT
     PRINT_HASH
     information "Hostname: ${_FQDN}" 
     information "Operating System: ${_OS} , Version: ${_OS_VER}" 
