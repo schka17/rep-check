@@ -289,10 +289,10 @@ function DL_INSTALLER {
 function ENTER_TOKEN {
     #cecho -c 'BrightGreen' "############################";
     PRINT_HASH
-    read -p $'\e[0;37mEnter your Token    :\e[1;33m ' TOKEN
+    read -p $'\e[0;37mEnter your Repository Access Token    :\e[1;33m ' TOKEN
     PRINT_HASH
     #echo $'\e[0;92m############################'
-    cecho -c 'BrightWhite' "Token       =    ${TOKEN}"
+    cecho -c 'BrightWhite' "Repository Access Token       =    ${TOKEN}"
     PRINT_HASH
     #cecho -c 'BrightGreen' "############################"
     read -p $'\e[0;31mConfirm (Y) change Token (C) Exit (N)? (Y/N/C): \e[1;33m ' confirm
