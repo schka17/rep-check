@@ -319,7 +319,11 @@ function PROCEED {
     PRINT_HASH
     #echo $'\e[0;92m############################';
     echo ""
-    echo "to proceed you need a valid Customer ID and Token!"
+    echo "to download the installer you need a valid Access Token!"
+    echo "(your personal access token based on your repository account)"
+    echo ""
+    echo "to proceed with downloaded installer you need a valid Cockpit ID and Token!"
+    echo "(Cockpit Token is issued per licensed cockpit instance)"
     echo ""
     echo "Report any errors to support@c4sam.com"
     echo ""
