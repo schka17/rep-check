@@ -337,7 +337,7 @@ function PROCEED {
         * )
             echo "Exit without installing"
             echo $'\e[0m'
-            exit
+            exit 0
             ;;
     esac
 
