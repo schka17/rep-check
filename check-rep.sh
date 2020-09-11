@@ -192,7 +192,7 @@ _OS_NAME="$(grep "^NAME" /etc/*-release | cut -d"=" -f2-)"
 _DEFAULT_GW="$(netstat -rn | awk '/^0.0.0.0/ { print $2 }')"
 _FQDN="$(hostname -f)"
 #_DEFAULT_INT="$(route | awk '/default/ { print $8 }')"
-
+_CWD="$(pwd)"
 
 function PRINT_HASH {
     cecho -c 'yellow' "############################################################################################"
@@ -520,5 +520,5 @@ PROCEED
 }
 
 main 2>&1 | tee -a /var/log/${script}.log
-
+cd $_CWD
 exit 0
