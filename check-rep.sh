@@ -357,6 +357,7 @@ function SELECT_INSTALLATION {
             * )
                 echo "exit"
                 echo $'\e[0m'
+                exit 0
                 ;;
         esac
 }
