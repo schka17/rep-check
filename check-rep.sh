@@ -343,7 +343,8 @@ function PROCEED {
 
 }
 function SELECT_INSTALLATION {
-        read -p $'\e[0;34mSelect Installation ? (C)ockpit  (M)inion (E)xit? (C/M/E): \e[1;33m ' _select
+        #read -p $'\e[0;34mSelect Installation ? (C)ockpit  (M)inion (E)xit? (C/M/E): \e[1;33m ' _select
+        read -p $'Select Installation ? (C)ockpit  (M)inion (E)xit? (C/M/E):  ' _select
         case $_select in
             c|C )
                 _install_type="cockpit" ;;
