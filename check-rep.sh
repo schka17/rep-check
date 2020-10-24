@@ -367,7 +367,7 @@ function CHECK_UPDATES {
     apt -y update >  /var/log/${script}.log 2>&1
     _no_updates=`apt list --upgradeable 2>> /var/log/${script}.log | grep -v -e '^[[:space:]]*$' | grep -v 'Listing'| wc -l`
     information "${_no_updates} Updates available"
-    apt list --upgradable
+    apt list --upgradable 2>/dev/null |grep -v "^Listing"
     if [[ $_no_updates -gt 0 ]]; then
     read -p $'\e[0;31mProceed updating packages? (Y) No (N)? (Y/N): \e[1;33m ' confirm
         case $confirm in
