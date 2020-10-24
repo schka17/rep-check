@@ -155,6 +155,7 @@ function GET_DEFAULT_GW {
 function SCRIPT_ABORT {
     
     error "${_exit_message}  Aborting ..."
+    information "for detailed information see /var/log/${script}.log"
     exit $_exit_code
 }
 
