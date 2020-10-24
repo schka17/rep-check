@@ -424,6 +424,17 @@ function CHECK_DEBIAN_SOURCES {
     fi     
 }
 
+function GET_PUBLIC_IP_HTTP {
+    set +e  ### dont exit on returncode > 0
+    myWanIP=`curl -s https://ipapi.co/ip/`
+    if [[ $? -gt 0 ]]; then
+        error "Public IP could not be determind"
+    else    
+        information "Public IP is ${myWanIP}"
+    fi
+    set -e  
+}
+
 function GET_PUBLIC_IP {
     set +e  ### dont exit on returncode > 0
     myWanIP=`dig +short myip.opendns.com @resolver1.opendns.com`
@@ -468,7 +479,7 @@ function main() {
     information "Operating System: ${_OS} , Version: ${_OS_VER}" 
     information "Default Interface: ${_DEFAULT_INT}, Default GW: ${_DEFAULT_GW}"
     # get public IP
-    GET_PUBLIC_IP
+    GET_PUBLIC_IP_HTTP
     
     PRINT_HASH
     information "Checking Name Resolution"
