@@ -241,7 +241,7 @@ function CHECK_PKG {
 }
 
 function CHECK_PACKAGES {
-    information "Checking Software Packages"
+    information "Checking required Software Packages"
     for i in $_REQUIREMENTS; do
         #echo "Checking Software Package ${i} "
         CHECK_PKG $i
