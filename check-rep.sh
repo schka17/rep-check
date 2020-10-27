@@ -218,7 +218,7 @@ function CHECK_REPOSITORY_ALIVE {
 function CHECK_LANGUAGE_SETTING {
     if [[ "${LANG}" != "${_REQ_LANG}" ]] ; then
         declare -i _exit_code=8
-        declare _exit_message="Wrong Language settings ${LANG}, must be ${_REQ_LANG} "
+        declare _exit_message="Wrong Language settings ${LANG}, must be ${_REQ_LANG}. To change Language run dpkg-reconfigure locales, select ${_REQ_LANG} and reboot"
         SCRIPT_ABORT
     else
         success "Check Language settings passed ${LANG}"    
