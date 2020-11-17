@@ -166,6 +166,17 @@ if [ "$EUID" -ne 0 ]
   SCRIPT_ABORT #$_exit_code $_exit_message 
   #exit
 fi
+
+if [ "$USER" != "root"] 
+    then
+    declare -i _exit_code=1
+    declare _exit_message="Please run as root or sudo!"
+    SCRIPT_ABORT #$_exit_code $_exit_message 
+  #exit
+fi
+
+
+
 script="${0##*/}"
 #exec 2>&1 | tee -a /var/log/${script} 
 #exec 1 2>&1 | tee -a /var/log/$script.log
