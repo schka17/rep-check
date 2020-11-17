@@ -131,26 +131,26 @@ function GET_DEFAULT_INT {
     fi    
 }
 function GET_DEFAULT_GW {
-    _interface="$(netstat -rn | awk '/default/ { print $8 }')"
-    _DEFAULT_INT=""
-    if [[ $_interface == "" ]] ; then
-        _interface="$(netstat -rn | awk '/^0.0.0.0/ { print $8 }')"
-        #error "could not determine Deafult Interface"
+    # _interface="$(netstat -rn | awk '/default/ { print $8 }')"
+    # _DEFAULT_INT=""
+    # if [[ $_interface == "" ]] ; then
+    #     _interface="$(netstat -rn | awk '/^0.0.0.0/ { print $8 }')"
+    #     #error "could not determine Deafult Interface"
         
-        if [[ $_interface == "" ]] ; then
-            warning "could not determine Deafult Interface"
-            _DEFAULT_INT=""
-        else
-         _DEFAULT_INT=$_interface
+    #     if [[ $_interface == "" ]] ; then
+    #         warning "could not determine Deafult Interface"
+    #         _DEFAULT_INT=""
+    #     else
+    #      _DEFAULT_INT=$_interface
         
-        fi    
-    else
-         _DEFAULT_INT=$_interface
-    fi
-    if [[ $_DEFAULT_INT == "" ]] ; then
-        warning "could not determine Default Interface"
-        _DEFAULT_INT="n/a"
-    fi    
+    #     fi    
+    # else
+    #      _DEFAULT_INT=$_interface
+    # fi
+    # if [[ $_DEFAULT_INT == "" ]] ; then
+    #     warning "could not determine Default Interface"
+    #     _DEFAULT_INT="n/a"
+    # fi    
 }
 function SCRIPT_ABORT {
     
@@ -201,7 +201,7 @@ _REQUIREMENTS="route dig traceroute git curl netstat ntpstat" #docker sohuold be
 _OS="$(grep "^ID" /etc/*-release | cut -d"=" -f2-)"
 _OS_VER="$(grep "^VERSION_ID" /etc/*-release | cut -d"=" -f2- | awk '{gsub(/\"|\;/,"",$1)}1')"
 _OS_NAME="$(grep "^NAME" /etc/*-release | cut -d"=" -f2-)"
-_DEFAULT_GW="$(netstat -rn | awk '/^0.0.0.0/ { print $2 }')"
+#_DEFAULT_GW="$(netstat -rn | awk '/^0.0.0.0/ { print $2 }')"
 _FQDN="$(hostname -f)"
 #_DEFAULT_INT="$(route | awk '/default/ { print $8 }')"
 _CWD="$(pwd)"
@@ -486,7 +486,8 @@ function main() {
         # exit 3
     fi
     GET_DEFAULT_INT
-    GET_DEFAULT_INT
+    _DEFAULT_GW="$(netstat -rn | awk '/^0.0.0.0/ { print $2 }')"
+    
     PRINT_HASH
     information "Hostname: ${_FQDN}" 
     information "Operating System: ${_OS} , Version: ${_OS_VER}" 
