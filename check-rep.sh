@@ -130,28 +130,28 @@ function GET_DEFAULT_INT {
         _DEFAULT_INT="n/a"
     fi    
 }
-function GET_DEFAULT_GW {
-    # _interface="$(netstat -rn | awk '/default/ { print $8 }')"
-    # _DEFAULT_INT=""
-    # if [[ $_interface == "" ]] ; then
-    #     _interface="$(netstat -rn | awk '/^0.0.0.0/ { print $8 }')"
-    #     #error "could not determine Deafult Interface"
+# function GET_DEFAULT_GW {
+#     # _interface="$(netstat -rn | awk '/default/ { print $8 }')"
+#     # _DEFAULT_INT=""
+#     # if [[ $_interface == "" ]] ; then
+#     #     _interface="$(netstat -rn | awk '/^0.0.0.0/ { print $8 }')"
+#     #     #error "could not determine Deafult Interface"
         
-    #     if [[ $_interface == "" ]] ; then
-    #         warning "could not determine Deafult Interface"
-    #         _DEFAULT_INT=""
-    #     else
-    #      _DEFAULT_INT=$_interface
+#     #     if [[ $_interface == "" ]] ; then
+#     #         warning "could not determine Deafult Interface"
+#     #         _DEFAULT_INT=""
+#     #     else
+#     #      _DEFAULT_INT=$_interface
         
-    #     fi    
-    # else
-    #      _DEFAULT_INT=$_interface
-    # fi
-    # if [[ $_DEFAULT_INT == "" ]] ; then
-    #     warning "could not determine Default Interface"
-    #     _DEFAULT_INT="n/a"
-    # fi    
-}
+#     #     fi    
+#     # else
+#     #      _DEFAULT_INT=$_interface
+#     # fi
+#     # if [[ $_DEFAULT_INT == "" ]] ; then
+#     #     warning "could not determine Default Interface"
+#     #     _DEFAULT_INT="n/a"
+#     # fi    
+# }
 function SCRIPT_ABORT {
     
     error "${_exit_message}  Aborting ..."
