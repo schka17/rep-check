@@ -283,7 +283,7 @@ function DL_INSTALLER {
         SCRIPT_ABORT
     elif [[ $_install_type == "cockpit" ]]; then
         _source="https://gitlab.c4sam.com/api/v4/projects/46/repository/files/install_cockpit.sh/raw?ref=master"
-    response="$(curl --request GET --header "PRIVATE-TOKEN: ${TOKEN}" -sL -w "%{http_code}" -o install_${_install_type}.sh ${_source})"
+    response="$(curl --request GET --header "PRIVATE-TOKEN: ${TOKEN}" -sL -w "%{http_code}" -O install_${_install_type}.sh ${_source})"
     #information "Command: curl --request GET --header \"PRIVATE-TOKEN: ${TOKEN}\" -sL -w \"%{http_code}\" -o install_${_install_type}.sh '${_source}' "
     fi
     case "$response" in
